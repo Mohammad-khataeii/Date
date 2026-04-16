@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-labelledby="title desc">
+  <title id="title">Cute bouquet with hearts</title>
+  <desc id="desc">A bright illustrated bouquet surrounded by hearts and sparkles.</desc>
+  <rect width="900" height="900" fill="#f5fff9"/>
+  <path d="M0 694C105 620 191 675 282 728c130 77 237 69 352-5 93-60 170-92 266-42v219H0Z" fill="#71d7b9"/>
+  <path d="M78 126c98-72 219-82 329-43 61 22 94 8 139-17 93-52 221-22 292 61 67 78 63 188 8 275-54 86-154 139-254 151-124 15-239-26-342-90C128 388 3 310 35 206c9-31 22-58 43-80Z" fill="#fff2e8"/>
+  <g stroke="#28312e" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M451 665c-28-126-12-261 47-375" fill="none"/>
+    <path d="M451 665c-78-116-130-232-155-349" fill="none"/>
+    <path d="M451 665c58-129 98-235 192-326" fill="none"/>
+    <path d="M451 665c-3-116 4-238-16-354" fill="none"/>
+    <path d="M451 665c38-105 40-219 0-342" fill="none"/>
+  </g>
+  <g stroke="#28312e" stroke-width="9" stroke-linejoin="round">
+    <path d="M399 265c-36-41-108-21-117 34-55-1-89 65-53 107 36 42 108 22 117-34 56 0 89-65 53-107Z" fill="#ff4f84"/>
+    <path d="M517 247c-28-48-103-42-120 11-54-10-99 48-71 96s103 42 120-11c54 10 99-48 71-96Z" fill="#fff36e"/>
+    <path d="M692 310c-33-44-107-31-121 23-55-5-95 57-62 101 33 45 107 31 121-22 55 4 95-58 62-102Z" fill="#ff8da9"/>
+    <path d="M516 348c-41-36-109-5-109 50-55 7-78 78-37 114s109 5 109-50c55-7 78-78 37-114Z" fill="#71d7b9"/>
+  </g>
+  <g fill="#ff4f84" stroke="#28312e" stroke-width="7" stroke-linejoin="round">
+    <path d="M174 173c18-35 69-19 66 21 31-25 73 8 56 44-21 43-93 56-136 61-23-37-52-104-30-147 18-35 66-20 44 21Z"/>
+    <path d="M713 174c18-35 69-19 66 21 31-25 73 8 56 44-21 43-93 56-136 61-23-37-52-104-30-147 18-35 66-20 44 21Z"/>
+  </g>
+  <g fill="#fff36e" stroke="#28312e" stroke-width="6">
+    <path d="M143 515h42v42h-42z" transform="rotate(45 164 536)"/>
+    <path d="M713 531h34v34h-34z" transform="rotate(45 730 548)"/>
+    <path d="M629 109h32v32h-32z" transform="rotate(45 645 125)"/>
+  </g>
+  <path d="M327 658h248l-39 172H366Z" fill="#fff" stroke="#28312e" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M357 707h188" stroke="#ff4f84" stroke-width="12" stroke-linecap="round"/>
+</svg>
