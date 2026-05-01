@@ -1,8 +1,14 @@
 # Romantic Gift Card Challenge
 
-A playful React + Vite mini-game where your girlfriend has to remember the date of your first in-person date to unlock the gift reveal.
+A playful React + Vite mini-game that starts sweet, gets annoying on purpose, and ends with a gift-card reveal plus an `EVIDENCE.pdf` download.
 
-If she guesses the correct date, the app shows the winning screen and calls a configurable webhook so you can send the Amazon gift card manually.
+## How It Works
+
+1. The date challenge starts with zero attempts.
+2. She gets one ridiculous question at a time in a modal.
+3. Every `Yes` answer earns one date guess.
+4. Every wrong date guess spends one attempt and opens the next question modal.
+5. At the end, the app reveals the prank and generates `EVIDENCE.pdf` with every question and answer.
 
 ## Install
 
@@ -12,7 +18,7 @@ npm install
 
 ## Run Locally
 
-Create a local `.env` file from `.env.example`, then set your values:
+Create a local `.env` file from `.env.example`:
 
 ```bash
 cp .env.example .env
@@ -32,13 +38,7 @@ http://localhost:5173
 
 ## Environment Variables
 
-Set the correct answer in `YYYY-MM-DD` format:
-
-```text
-VITE_CORRECT_DATE=2025-01-31
-```
-
-Do not hardcode the real date into the UI.
+The prank date logic is currently hardcoded in the app.
 
 To receive a notification when she wins, set a public-safe webhook URL:
 
@@ -46,7 +46,7 @@ To receive a notification when she wins, set a public-safe webhook URL:
 VITE_WEBHOOK_URL=https://example.com/webhook
 ```
 
-When the correct date is submitted, the app sends:
+When the winner flow is triggered, the app sends:
 
 ```json
 {
@@ -56,7 +56,7 @@ When the correct date is submitted, the app sends:
 }
 ```
 
-If `VITE_WEBHOOK_URL` is missing, the app will log the payload to the browser console and still show the win screen.
+If `VITE_WEBHOOK_URL` is missing, the app logs the payload in the browser console and still shows the winner flow.
 
 ## Build
 
@@ -70,8 +70,7 @@ The production build will be generated in `dist/`.
 
 1. Push the repo to GitHub.
 2. Import the project into [Vercel](https://vercel.com).
-3. Set these environment variables in the Vercel project settings:
-   - `VITE_CORRECT_DATE`
+3. Set this environment variable in the Vercel project settings:
    - `VITE_WEBHOOK_URL`
 4. Deploy with:
 
@@ -86,8 +85,7 @@ Install Command: npm install
 
 1. Push the repo to GitHub.
 2. Import the repo into [Netlify](https://www.netlify.com).
-3. Set these environment variables in site settings:
-   - `VITE_CORRECT_DATE`
+3. Set this environment variable in site settings:
    - `VITE_WEBHOOK_URL`
 4. Use:
 
@@ -98,7 +96,8 @@ Publish directory: dist
 
 ## Notes
 
-- The app allows exactly 3 attempts.
-- The date picker and submit button are disabled after a win or after 3 failed attempts.
+- The question flow is modal-based and one-at-a-time.
+- The final screen auto-prepares and downloads `EVIDENCE.pdf`.
+- The PDF includes every question, every answer she gave, and the signature `Clelia Guisgand`.
 - A reset button is available only in development mode.
 - Use only public-safe frontend environment variables. Do not place private secrets in Vite env files.
