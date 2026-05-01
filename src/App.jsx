@@ -1010,7 +1010,7 @@ function App() {
               <h1>{isPrankReveal ? 'I was trolling you 😌💝' : 'You out-chaosed the chaos 💖'}</h1>
               <p className="subtitle">
                 {isPrankReveal
-                  ? `I already know the right date is ${realDateReveal}, but I wanted to annoy you. You still won the gift card, You will get it as soon as you send me the evidence file.`
+                  ? `I already know the right date is ${realDateReveal}, but I wanted to annoy you. You still won an Amazon gift card to buy happiness for the princess, You will get it as soon as you send me the evidence file.`
                   : 'You won the gift. I’ll send your Amazon gift card soon.'}
               </p>
               <p className="status-note status-note--won">
