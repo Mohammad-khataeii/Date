@@ -1,166 +1,236 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 
-const notes = [
-  'I found a table for two in my imagination.',
-  'There may be dessert. There will definitely be me smiling too much.',
-  'You bring the cute face. I will bring the plan.',
-  'This button is legally required to say yes.',
-  'I checked the forecast. It says 100% chance of cute.',
-  'Tiny proposal, huge butterflies.',
-  'Say yes and I promise to act normal for at least seven minutes.',
-  'I already told my playlist to dress nicely.',
-  'A date with you sounds better than literally any other plan.',
-  'The stars said yes. The moon nodded. Very official.',
-  'One yes unlocks snacks, smiles, and suspiciously good company.',
-  'I can be charming, punctual, and only mildly dramatic.',
-  'This could be the start of our favorite little story.',
-  'Your smile deserves a reservation.',
-  'I have a plan. It includes you, me, and something sweet.',
-  'No pressure. Except from the runaway button. It is biased.',
-  'My heart made this website and refused to be subtle.',
-  'If yes were a flower, I would bring the whole garden.',
-  'Dinner? Coffee? Walk? I am flexible, as long as you are there.',
-  'The no button has not been emotionally available for years.',
+const correctDate = import.meta.env.VITE_CORRECT_DATE?.trim() ?? '';
+const webhookUrl = import.meta.env.VITE_WEBHOOK_URL?.trim() ?? '';
+const maxAttempts = 3;
+
+const wrongFeedback = [
+  'Hmm... cute guess, but no 😌',
+  'Careful, babe. One more chance 💅',
+  'Ouch. I’ll pretend I didn’t see that 😭',
 ];
 
-function pickSpot() {
-  const padding = 18;
-  const width = Math.min(160, window.innerWidth * 0.34);
-  const height = 56;
-  return {
-    left: Math.max(padding, Math.random() * (window.innerWidth - width - padding)),
-    top: Math.max(padding, Math.random() * (window.innerHeight - height - padding)),
-  };
+function FloatingDecor() {
+  return (
+    <div className="floating-decor" aria-hidden="true">
+      <span className="decor-heart decor-heart--one">♥</span>
+      <span className="decor-heart decor-heart--two">♥</span>
+      <span className="decor-heart decor-heart--three">♥</span>
+      <span className="decor-spark decor-spark--one">✦</span>
+      <span className="decor-spark decor-spark--two">✦</span>
+      <span className="decor-spark decor-spark--three">✦</span>
+    </div>
+  );
 }
 
-export default function App() {
-  const [answer, setAnswer] = useState('waiting');
-  const [noSpot, setNoSpot] = useState(null);
-  const [runCount, setRunCount] = useState(0);
-  const noButtonRef = useRef(null);
-  const runTimerRef = useRef(null);
-  const lastRunRef = useRef(0);
-  const note = useMemo(() => notes[runCount % notes.length], [runCount]);
+function CelebrationBurst() {
+  return (
+    <div className="celebration-burst" aria-hidden="true">
+      <span>♥</span>
+      <span>✦</span>
+      <span>♥</span>
+      <span>✦</span>
+      <span>♥</span>
+      <span>✦</span>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    return () => {
-      if (runTimerRef.current) {
-        window.clearTimeout(runTimerRef.current);
-      }
-    };
-  }, []);
-
-  const makeNoRun = () => {
-    const button = noButtonRef.current;
-    const now = Date.now();
-
-    if (!button || now - lastRunRef.current < 520) {
-      return;
-    }
-
-    lastRunRef.current = now;
-    const box = button.getBoundingClientRect();
-    const startSpot = {
-      left: box.left,
-      top: box.top,
-    };
-
-    if (runTimerRef.current) {
-      window.clearTimeout(runTimerRef.current);
-    }
-
-    setNoSpot(startSpot);
-    setRunCount((count) => count + 1);
-    runTimerRef.current = window.setTimeout(() => {
-      setNoSpot(pickSpot());
-    }, 45);
+async function notifyWinner(selectedDate) {
+  const payload = {
+    event: 'gift_card_challenge_won',
+    selectedDate,
+    timestamp: new Date().toISOString(),
   };
 
-  const guardNoButton = (event) => {
-    const button = noButtonRef.current;
-    if (!button || answer === 'yes') {
+  if (!webhookUrl) {
+    console.log('Winner notification payload:', payload);
+    return;
+  }
+
+  const response = await fetch(webhookUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Webhook request failed with status ${response.status}`);
+  }
+}
+
+function App() {
+  const [screen, setScreen] = useState('landing');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [attempts, setAttempts] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [validationMessage, setValidationMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isLocked = attempts >= maxAttempts;
+  const remainingAttempts = Math.max(maxAttempts - attempts, 0);
+  const helperText = useMemo(() => {
+    if (screen === 'won') {
+      return 'Honestly, I was hoping you’d get it right.';
+    }
+
+    if (isLocked) {
+      return 'Challenge failed... but you’re still cute. Ask me nicely and maybe I’ll help.';
+    }
+
+    if (attempts === 0) {
+      return 'You get three chances. No pressure. Okay, a little pressure.';
+    }
+
+    return feedback;
+  }, [attempts, feedback, isLocked, screen]);
+
+  const handleStart = () => {
+    setScreen('challenge');
+    setValidationMessage('');
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (screen === 'won' || isLocked || isSubmitting) {
       return;
     }
 
-    const box = button.getBoundingClientRect();
-    const pointerX = event.clientX;
-    const pointerY = event.clientY;
-    const dangerZone = 115;
-    const isClose =
-      pointerX > box.left - dangerZone &&
-      pointerX < box.right + dangerZone &&
-      pointerY > box.top - dangerZone &&
-      pointerY < box.bottom + dangerZone;
-
-    if (isClose) {
-      makeNoRun();
+    if (!selectedDate) {
+      setValidationMessage('Pick a date first, pretty please.');
+      return;
     }
+
+    setValidationMessage('');
+
+    if (selectedDate === correctDate && correctDate) {
+      setIsSubmitting(true);
+
+      try {
+        await notifyWinner(selectedDate);
+      } catch (error) {
+        console.warn('Winner notification failed:', error);
+      } finally {
+        setIsSubmitting(false);
+        setScreen('won');
+      }
+
+      return;
+    }
+
+    const nextAttempts = attempts + 1;
+    setAttempts(nextAttempts);
+    setFeedback(wrongFeedback[nextAttempts - 1] ?? wrongFeedback[wrongFeedback.length - 1]);
+  };
+
+  const handleReset = () => {
+    setScreen('landing');
+    setSelectedDate('');
+    setAttempts(0);
+    setFeedback('');
+    setValidationMessage('');
+    setIsSubmitting(false);
   };
 
   return (
-    <main className={answer === 'yes' ? 'page page--yes' : 'page'} onMouseMove={guardNoButton}>
-      <div className="sparkle-field" aria-hidden="true">
-        <span />
-        <span />
-        <span />
-        <span />
-        <span />
-        <span />
-      </div>
+    <main className={screen === 'won' ? 'app app--won' : 'app'}>
+      <FloatingDecor />
 
-      <section className="invite" aria-live="polite">
-        <div className="photo-strip">
-          <img
-            src="/date-flowers.svg"
-            alt="A cute bouquet with hearts"
-          />
+      <section className="card" aria-live="polite">
+        <div className="card__visual">
+          <img src="/date-flowers.svg" alt="Romantic bouquet illustration" />
         </div>
 
-        <div className="copy">
-          <p className="eyebrow">
-            <span aria-hidden="true">♡</span>
-            one very important question
-          </p>
-
-          {answer === 'yes' ? (
+        <div className="card__content">
+          {screen === 'landing' && (
             <>
-              <h1>Perfect. It is a date.</h1>
-              <p className="lead">
-                I knew the universe had excellent taste. I will plan something sweet, cozy,
-                and just a little bit ridiculous.
+              <p className="eyebrow">Private little puzzle</p>
+              <h1>You have a gift waiting for you... maybe 💝</h1>
+              <p className="subtitle">
+                But first, prove you remember something important.
               </p>
-              <div className="celebration">
-                <span aria-hidden="true">♥</span>
-                <span>Yes accepted. Heart officially doing cartwheels.</span>
-                <span aria-hidden="true">✦</span>
-              </div>
+              <button className="primary-button" type="button" onClick={handleStart}>
+                Start the challenge
+              </button>
             </>
-          ) : (
+          )}
+
+          {screen === 'challenge' && (
             <>
-              <h1>Will you go on a date with me?</h1>
-              <p className="lead">{note}</p>
-              <div className="button-row">
-                <button className="yes-button" type="button" onClick={() => setAnswer('yes')}>
-                  Yes
-                </button>
-                <button
-                  ref={noButtonRef}
-                  className={noSpot ? 'no-button no-button--loose' : 'no-button'}
-                  style={noSpot ? { left: `${noSpot.left}px`, top: `${noSpot.top}px` } : undefined}
-                  type="button"
-                  onMouseEnter={makeNoRun}
-                  onFocus={makeNoRun}
-                  onPointerDown={(event) => {
-                    event.preventDefault();
-                    makeNoRun();
-                  }}
-                >
-                  No
-                </button>
-              </div>
-              <p className="tiny-text">
-                Warning: the no button has commitment issues and excellent cardio.
+              <p className="eyebrow">Round one of romance</p>
+              <h1>Choose the date of our first in-person date.</h1>
+              <p className="subtitle">{helperText}</p>
+
+              <form className="challenge-form" onSubmit={handleSubmit}>
+                <label className="field-label" htmlFor="first-date">
+                  Our first in-person date
+                </label>
+                <input
+                  id="first-date"
+                  className="date-input"
+                  type="date"
+                  value={selectedDate}
+                  onChange={(event) => setSelectedDate(event.target.value)}
+                  disabled={isLocked || isSubmitting}
+                  aria-describedby="attempts-note status-note"
+                />
+
+                <div className="status-row" id="attempts-note">
+                  <span className="attempt-chip">Attempts left: {remainingAttempts}</span>
+                  <span className="attempt-copy">
+                    {remainingAttempts === 1 ? 'Last shot.' : 'Use them wisely.'}
+                  </span>
+                </div>
+
+                {validationMessage && (
+                  <p className="validation-message" role="alert">
+                    {validationMessage}
+                  </p>
+                )}
+
+                <div className="actions">
+                  <button
+                    className="primary-button"
+                    type="submit"
+                    disabled={isLocked || isSubmitting}
+                  >
+                    {isSubmitting ? 'Checking your answer...' : 'Lock it in'}
+                  </button>
+
+                  {import.meta.env.DEV && (
+                    <button className="secondary-button" type="button" onClick={handleReset}>
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </form>
+
+              <p className={isLocked ? 'status-note status-note--locked' : 'status-note'} id="status-note">
+                {helperText}
               </p>
+            </>
+          )}
+
+          {screen === 'won' && (
+            <>
+              <CelebrationBurst />
+              <p className="eyebrow">Challenge complete</p>
+              <h1>You remembered 🥹💖</h1>
+              <p className="subtitle">
+                You won the gift. I’ll send your Amazon gift card soon.
+              </p>
+              <p className="status-note status-note--won">
+                Honestly, I was hoping you’d get it right.
+              </p>
+
+              {import.meta.env.DEV && (
+                <button className="secondary-button" type="button" onClick={handleReset}>
+                  Reset
+                </button>
+              )}
             </>
           )}
         </div>
@@ -168,3 +238,5 @@ export default function App() {
     </main>
   );
 }
+
+export default App;
